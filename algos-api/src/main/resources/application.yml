@@ -1,0 +1,5 @@
+spring:
+  application:
+    names: alogs-api
+server:
+  port: 8080
