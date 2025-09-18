@@ -1,0 +1,29 @@
+spring:
+  # === DB (Local) ===
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/newscache}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
+  jpa:
+    hibernate:
+      ddl-auto: update   # 개발 편의를 위해 update
+
+  # === Redis (Local) ===
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,httpexchanges  # 로컬에서 HTTP 교환 로그 확인
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    org.hibernate.SQL: debug
+    org.hibernate.orm.jdbc.bind: trace   # 바인딩 파라미터까지 보기 (원하면 유지)

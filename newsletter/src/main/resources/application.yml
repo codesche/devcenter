@@ -1,0 +1,41 @@
+spring:
+  application:
+    name: news-cache-api
+
+  # === JPA ?? ===
+  jpa:
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+
+  # === Cache ?? ===
+  cache:
+    type: redis
+    redis:
+      # ?? TTL (?:10?). ?? ??? ?????.
+      time-to-live: 600000
+
+server:
+  port: 8080
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info, metrics
+  endpoint:
+    health:
+      show-details: when_authorized
+
+security:
+  jwt:
+    secret: ${JWT_SECRET:ABCDASERQEWRQWREQWERQDASFDASFAEWRQDSAFSFWERQWREWRSDAFADSFDASFASDFDASFADSASDF}
+    access-token-ttl-seconds: 3600
+    refresh-token-ttl-seconds: 1209600
+
+external:
+  news:
+    base-url: https://newsapi.org/v2
+    api-key: ${NEWS_API_KEY:put-your-key}
+    default-page-size: 10

@@ -1,0 +1,64 @@
+spring:
+  application:
+    name: news-cache-api   # 애플리케이션 이름
+
+  # ==============================
+  # Database (PostgreSQL)
+  # ==============================
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/newscache}  # DB URL (환경변수 없으면 기본값)
+    username: ${DB_USERNAME:postgres}                          # DB 사용자
+    password: ${DB_PASSWORD:postgres}                          # DB 비밀번호
+  jpa:
+    hibernate:
+      ddl-auto: update                                         # 스키마 자동 생성/업데이트
+    properties:
+      hibernate:
+        format_sql: true                                       # SQL 로그 예쁘게 출력
+
+  # ==============================
+  # Redis & Cache
+  # ==============================
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}   # Redis 서버 호스트
+      port: ${REDIS_PORT:6379}        # Redis 서버 포트
+  cache:
+    type: redis                       # Spring Cache를 Redis로 사용
+
+# ==============================
+# Server Config
+# ==============================
+server:
+  port: 8080                          # 서버 실행 포트
+
+# ==============================
+# Actuator (모니터링/관리)
+# ==============================
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,httpexchanges
+        # health         : 애플리케이션 상태 체크
+        # info           : 빌드/애플리케이션 정보
+        # metrics        : 메트릭 데이터 제공
+        # httpexchanges  : HTTP 요청/응답 기록
+
+# ==============================
+# Security (JWT)
+# ==============================
+security:
+  jwt:
+    secret: ${JWT_SECRET:change-me}          # JWT 서명 키 (환경변수/시크릿 매니저로 관리 권장)
+    access-token-ttl-seconds: 3600           # Access Token TTL (1시간)
+    refresh-token-ttl-seconds: 1209600       # Refresh Token TTL (14일)
+
+# ==============================
+# External API (News API)
+# ==============================
+external:
+  news:
+    base-url: https://newsapi.org/v2
+    api-key: ${NEWS_API_KEY:put-your-key}    # News API Key (환경변수/시크릿으로 관리)
+    default-page-size: 10                    # 기본 페이지 크기
