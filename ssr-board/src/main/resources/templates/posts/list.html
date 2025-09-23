@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::section})}">
+<head>
+  <title>Posts</title>
+</head>
+
+<section>
+  <a href="/posts/new">새 글 쓰기</a>
+  <table>
+    <thead>
+    <tr><th>ID</th><th>제목</th><th>작성자</th><th>댓글</th></tr>
+    </thead>
+    <tbody>
+    <tr th:each="p: ${page.content}">
+      <td th:text="${p.id}"></td>
+      <td><a th:href="@{'/posts/' + ${p.id}}" th:text="${p.title}"></a></td>
+      <td th:text="${p.authorNickname}"></td>   <!-- 여기 -->
+      <td th:text="${p.commentCount}"></td>     <!-- 여기 -->
+    </tr>
+    </tbody>
+  </table>
+
+  <div>
+    <span th:text="${page.page + 1}"></span> / <span th:text="${page.totalPages}"></span>
+    <div>
+      <a th:if="${page.page > 0}" th:href="@{'/posts'(page=${page.page - 1}, size=${page.size})}">이전</a>
+      <a th:if="${page.page + 1 < page.totalPages}" th:href="@{'/posts'(page=${page.page + 1}, size=${page.size})}">다음</a>
+    </div>
+  </div>
+</section>
+</html>

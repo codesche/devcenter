@@ -14,7 +14,7 @@ import java.time.LocalDateTime
 @Entity
 @EntityListeners(AuditingEntityListener::class)
 class Member protected constructor(
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, unique = true, length = 50)
     var nickname: String
 ) {
     @Id

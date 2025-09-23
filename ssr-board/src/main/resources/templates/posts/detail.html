@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::section})}">
+<head>
+  <title>Post Detail</title>
+</head>
+
+<section>
+  <a href="/posts">목록</a>
+  <h2 th:text="${post.title}"></h2>
+  <p><b>by</b> <span th:text="${post.author.nickname}"></span></p>
+  <pre th:text="${post.content}"></pre>
+
+  <hr/>
+  <ul>
+    <li th:each="c: ${post.comments}">
+      <b th:text="${c.author.nickname}"></b>: <span th:text="${c.content}"></span>
+    </li>
+  </ul>
+
+  <form th:action="@{'/posts/' + ${post.id} + '/comments'}" method="post">
+    <input type="text" name="nickname" placeholder="닉네임" required />
+    <input type="text" name="content" placeholder="댓글" required />
+    <button type="submit">등록</button>
+  </form>
+
+  <hr/>
+  <a th:href="@{'/posts/' + ${post.id} + '/edit'}">수정</a>
+
+  <!-- 액션/링크는 문자열 더하기 대신 경로 변수 방식 권장 -->
+  <a th:href="@{/posts}">목록</a>
+
+  <form th:action="@{/posts/{id}/comments(id=${post.id})}" method="post"></form>
+
+  <form th:action="@{/posts/{id}/delete(id=${post.id})}" method="post" style="display:inline">
+    <button type="submit" onclick="return confirm('삭제하시겠습니까?')">삭제</button>
+  </form>
+
+</section>
+</html>

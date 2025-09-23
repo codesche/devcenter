@@ -12,7 +12,6 @@ import jakarta.persistence.JoinColumn
 import jakarta.persistence.Lob
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
-import lombok.Getter
 import org.hibernate.annotations.BatchSize
 import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.annotation.LastModifiedDate
@@ -23,13 +22,13 @@ import java.time.LocalDateTime
 @EntityListeners(AuditingEntityListener::class)
 class Post protected constructor(
     @Column(nullable = false, length = 200)
-    var title: String,
+    var title: String = "",
 
     @Lob
     @Column(nullable = false)
-    var content: String,
+    var content: String = "",
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false, cascade = [CascadeType.PERSIST])
     @JoinColumn(name = "author_id", nullable = false)
     val author: Member
 ) {

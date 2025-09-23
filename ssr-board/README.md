@@ -1,196 +1,109 @@
-# Kotlin SSR 게시판 (Spring Boot + Thymeleaf)
+# 📘 KBoard - Kotlin Spring Boot 게시판 프로젝트
 
-이 프로젝트는 **Spring Boot 3 + Kotlin + Thymeleaf + JPA(H2)** 기반의 서버사이드 렌더링(SSR) 게시판 최소 예제입니다.
-
-## 주요 특징
-- 전역 예외 처리(@ControllerAdvice) + 의미 있는 도메인 예외(`EntityNotFoundException`, `BusinessException`)
-- 공통 API 응답 객체 `ApiResponse<T>` 제공
-- 비즈니스 로직은 Service 계층에만 작성
-- DTO 분리(요청/응답/도메인 DTO) 및 요청 DTO에 `@Valid` 검증
-- `record` 미사용, `@Setter` 지양(불변성 유지)
-- N+1 문제 방지: `@EntityGraph`, fetch join, `default_batch_fetch_size` 활용
-- 부모-자식(Post-Comment) 삭제 전이 + orphanRemoval 반영
-- RESTful 규칙형 URL (/posts, /posts/{id}, /posts/{id}/comments)
-- JPA dirty-checking 반영
-- SSR 기반의 Thymeleaf 템플릿 구성
+KBoard는 **Kotlin + Spring Boot + Thymeleaf + H2 DB** 기반으로 개발된 간단한 게시판 애플리케이션입니다.  
+회원(Member), 게시글(Post), 댓글(Comment) 도메인을 중심으로 CRUD와 연관관계 매핑, JPA 영속성 전이를 다루며, 학습 및 실습용으로 적합합니다.
 
 ---
 
-## 프로젝트 구조
-```
-kboard
- ├─ build.gradle.kts
- ├─ settings.gradle.kts
- ├─ src
- │  ├─ main
- │  │  ├─ kotlin/com/example/kboard
- │  │  │  ├─ KboardApplication.kt
- │  │  │  ├─ global (에러 처리, 공통 응답, JPA 설정)
- │  │  │  ├─ domain (Member, Post, Comment 엔티티)
- │  │  │  ├─ service (PostService, CommentService)
- │  │  │  ├─ web/controller (PostController)
- │  │  │  ├─ web/dto (Request/Response DTO)
- │  │  │  └─ util (PageResponse)
- │  │  ├─ resources
- │  │  │  ├─ application.yml
- │  │  │  └─ templates (Thymeleaf 템플릿)
- │  └─ test
+## 🚀 실행 방법
+
+### 1. 프로젝트 클론 및 의존성 설치
+```bash
+git clone <your-repo-url>
+cd kboard
+./gradlew clean build
 ```
 
----
-
-## Gradle 설정 (build.gradle.kts)
-```kotlin
-plugins {
-    id("org.springframework.boot") version "3.3.4"
-    id("io.spring.dependency-management") version "1.1.6"
-    kotlin("jvm") version "1.9.25"
-    kotlin("plugin.spring") version "1.9.25"
-    kotlin("plugin.jpa") version "1.9.25"
-}
-
-dependencies {
-    implementation("org.springframework.boot:spring-boot-starter-web")
-    implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
-    implementation("org.springframework.boot:spring-boot-starter-validation")
-    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
-    runtimeOnly("com.h2database:h2")
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
-}
-```
-
----
-
-## application.yml
-```yaml
-spring:
-  datasource:
-    url: jdbc:h2:mem:kboard;MODE=MySQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
-    driver-class-name: org.h2.Driver
-    username: sa
-    password: 
-  jpa:
-    hibernate:
-      ddl-auto: update
-    properties:
-      hibernate:
-        format_sql: true
-        default_batch_fetch_size: 100
-    open-in-view: false
-  thymeleaf:
-    cache: false
-
-logging:
-  level:
-    org.hibernate.SQL: debug
-    org.hibernate.orm.jdbc.bind: trace
-
-server:
-  port: 8080
-```
-
----
-
-## 엔티티 구조
-- **Member**: 닉네임 기반 사용자
-- **Post**: 제목, 내용, 작성자 / `Comment`와 1:N 관계
-- **Comment**: 내용, 작성자, `Post`와 연관
-
-`Post` 삭제 시 연관된 `Comment`도 자동 삭제 (Cascade + orphanRemoval).
-
----
-
-## DTO 예시
-**PostCreateRequest.kt**
-```kotlin
-class PostCreateRequest(
-    @field:NotBlank 
-    @field:Size(max = 200)
-    val title: String,
-
-    @field:NotBlank
-    val content: String,
-
-    @field:NotBlank
-    val nickname: String
-)
-```
-
-**PostResponse.kt**
-```kotlin
-class PostResponse(
-    val id: Long,
-    val title: String,
-    val content: String,
-    val authorNickname: String,
-    val commentCount: Int
-)
-```
-
----
-
-## 서비스 계층
-**PostService.kt**
-```kotlin
-@Service
-@Transactional(readOnly = true)
-class PostService(private val postRepository: PostRepository) {
-    fun list(page: Int, size: Int): PageResponse<PostResponse> { ... }
-    fun getDetail(id: Long): Post { ... }
-
-    @Transactional
-    fun create(req: PostCreateRequest): Long { ... }
-
-    @Transactional
-    fun update(id: Long, req: PostUpdateRequest) { ... }
-
-    @Transactional
-    fun delete(id: Long) { ... }
-}
-```
-
----
-
-## 컨트롤러
-**PostController.kt**
-```kotlin
-@Controller
-@RequestMapping
-class PostController(
-    private val postService: PostService,
-    private val commentService: CommentService
-) {
-    @GetMapping("/posts")
-    fun list(...) = "posts/list"
-
-    @GetMapping("/posts/{id}")
-    fun detail(...) = "posts/detail"
-
-    @PostMapping("/posts")
-    fun create(@Valid @ModelAttribute req: PostCreateRequest): String { ... }
-}
-```
-
----
-
-## Thymeleaf 템플릿
-- `posts/list.html` : 게시글 목록
-- `posts/detail.html` : 게시글 상세 + 댓글
-- `posts/form.html` : 글 작성/수정
-- `fragments/layout.html` : 공통 레이아웃
-
----
-
-## 실행 방법
+### 2. 애플리케이션 실행
 ```bash
 ./gradlew bootRun
-# 접속
-http://localhost:8080/posts
 ```
+
+애플리케이션은 기본적으로 **http://localhost:8080** 에서 실행됩니다.
+
+### 3. H2 콘솔 접속 (테스트 DB 확인)
+```
+http://localhost:8080/h2-console
+```
+- JDBC URL: `jdbc:h2:mem:kboard`
+- User: `sa`
 
 ---
 
-## 주의 사항
-- 이 프로젝트는 학습용 예제이며, 인증/보안/검증 로직은 최소화했습니다.
-- 실제 서비스 적용 시 Spring Security, CSRF, XSS 방어, 사용자 인증/권한 처리가 필요합니다.
+## 📂 주요 기능
+
+1. **게시판 목록 조회**
+    - 작성자 닉네임, 댓글 수 함께 표시
+    - 페이징 처리
+
+   ![게시판 목록](images/list.png)
+
+2. **게시글 상세 보기**
+    - 게시글 내용 표시
+    - 댓글 목록 + 댓글 작성 기능
+    - 수정, 삭제 기능 포함
+
+   ![게시글 상세](images/detail.png)
+
+3. **게시글 작성**
+    - 닉네임, 제목, 내용 입력 후 게시글 등록
+
+   ![게시글 작성](images/create.png)
+
+4. **게시글 수정**
+    - 기존 제목/내용 불러오기 → 수정 후 반영
+
+   ![게시글 수정](images/edit.png)
+
+---
+
+## 🛠 개발 과정 (Troubleshooting 포함)
+
+1. **초기 설정**
+    - Spring Boot 3.x + Kotlin 프로젝트 생성
+    - H2 DB, Spring Data JPA, Thymeleaf 의존성 추가
+
+2. **도메인 모델링**
+    - `Member`, `Post`, `Comment` 엔티티 작성
+    - 연관관계 매핑: Post ↔ Comment (1:N), Post ↔ Member (N:1)
+
+3. **JPA 오류 해결 과정**
+    - `TransientPropertyValueException`: `cascade = PERSIST` 옵션 추가로 해결
+    - `No default constructor`: Kotlin 엔티티에 `protected constructor()` 추가
+    - DTO ↔ 엔티티 변환 구조 정립 (`PostResponse`, `PostCreateRequest` 등)
+
+4. **View & Controller**
+    - Thymeleaf 템플릿 작성 (`list.html`, `detail.html`, `form.html`)
+    - PostController, CommentController 구현
+    - EL 오류 해결 (`post.author.nickname` → `post.authorNickname` DTO 기반 수정)
+
+5. **최종 UI 확인**
+    - 목록, 상세, 작성, 수정, 삭제, 댓글 CRUD 전부 정상 동작
+    - 스크린샷으로 동작 결과 기록
+
+---
+
+## 📸 실행 화면
+
+- **게시판 목록**  
+  ![게시판 목록](images/list.png)
+
+- **게시글 상세**  
+  ![게시글 상세](images/detail.png)
+
+- **게시글 작성**  
+  ![게시글 작성](images/create.png)
+
+- **게시글 수정**  
+  ![게시글 수정](images/edit.png)
+
+---
+
+## ✅ 마무리
+
+이번 프로젝트를 통해 다음을 학습했습니다:
+- Kotlin + Spring Boot 기반 JPA 사용법
+- 엔티티 간 연관관계 및 영속성 전이 문제 해결
+- DTO 변환 및 Controller-View 데이터 전달 구조
+- Thymeleaf 기반 서버 사이드 렌더링
+

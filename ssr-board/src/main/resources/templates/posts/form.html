@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::section})}">
+<head>
+  <title>Write</title>
+</head>
+
+<section>
+  <!-- 수정 폼 -->
+  <form th:if="${post != null}" th:action="@{'/posts/' + ${post.id}}" method="post" th:object="${updateForm}">
+    <label>제목 <input type="text" th:field="*{title}" required maxlength="200"/></label>
+    <label>내용 <textarea th:field="*{content}" required></textarea></label>
+    <button type="submit">수정</button>
+  </form>
+
+  <!-- 작성 폼 -->
+  <form th:if="${post == null}" th:action="@{'/posts'}" method="post" th:object="${postForm}">
+    <label>닉네임 <input type="text" th:field="*{nickname}" required/></label>
+    <label>제목 <input type="text" th:field="*{title}" required maxlength="200"/></label>
+    <label>내용 <textarea th:field="*{content}" required></textarea></label>
+    <button type="submit">등록</button>
+  </form>
+</section>
+</html>

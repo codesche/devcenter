@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:fragment="layout(title, content)">
+<head>
+  <meta charset="UTF-8" />
+  <title th:replace="${title}">kboard</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sakura.css/css/sakura.css" />
+</head>
+<body>
+<header>
+  <h1><a href="/posts">kboard</a></h1>
+  <hr/>
+</header>
+<main>
+  <div th:replace="${content}"></div>
+</main>
+</body>
+</html>

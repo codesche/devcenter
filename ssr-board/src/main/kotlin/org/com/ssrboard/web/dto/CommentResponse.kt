@@ -2,16 +2,11 @@ package org.com.ssrboard.web.dto
 
 import org.com.ssrboard.domain.Comment
 
-class CommentResponse (
+data class CommentResponse(val authorNickname: String, val content: String)
+data class PostDetailResponse(
     val id: Long,
+    val title: String,
     val content: String,
-    val authorNickname: String
-) {
-    companion object {
-        fun from(c: Comment) = CommentResponse(
-            id = c.id!!,
-            content = c.content,
-            authorNickname = c.author.nickname
-        )
-    }
-}
+    val authorNickname: String,
+    val comments: List<CommentResponse>
+)
