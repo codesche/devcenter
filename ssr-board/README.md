@@ -101,7 +101,7 @@ http://localhost:8080/h2-console
 
 ## ✅ 마무리
 
-이번 프로젝트를 통해 다음을 학습했습니다:
+이번 프로젝트를 통해 학습한 내용:
 - Kotlin + Spring Boot 기반 JPA 사용법
 - 엔티티 간 연관관계 및 영속성 전이 문제 해결
 - DTO 변환 및 Controller-View 데이터 전달 구조
