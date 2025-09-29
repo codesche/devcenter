@@ -6,3 +6,5 @@
 4. [ToDo List API](https://github.com/codesche/devcenter/tree/main/todolist)
 5. [Kotlin 기본 실습](https://github.com/codesche/devcenter/tree/main/kotlin-edu/kotlin-exercise)
 6. [회원가입 + 로그인](https://github.com/codesche/devcenter/tree/main/authproject)
+7. [코틀린 게시판](https://github.com/codesche/devcenter/tree/main/kotlin-edu/kotlin-exercise)
+8. [ready-for-tech-interview](https://github.com/codesche/devcenter/tree/main/techinterview)
