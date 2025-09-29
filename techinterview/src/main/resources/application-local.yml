@@ -1,0 +1,86 @@
+spring:
+  config:
+    activate:
+      on-profile: local
+
+  # H2 Database 설정 (로컬 개발용)
+  datasource:
+    url: jdbc:h2:mem:testdb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+    hikari:
+      maximum-pool-size: 5
+      minimum-idle: 2
+      connection-timeout: 20000
+      idle-timeout: 300000
+      max-lifetime: 1200000
+
+  # H2 Console 활성화
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+  # JPA 로컬 설정
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        format_sql: true
+        show_sql: true
+        use_sql_comments: true
+
+  # Redis 설정 (로컬 - 임베디드 또는 도커)
+  redis:
+    host: localhost
+    port: 6379
+    password:
+    lettuce:
+      pool:
+        max-active: 5
+        max-idle: 5
+        min-idle: 0
+
+  # 캐시 설정
+  cache:
+    type: redis
+    redis:
+      time-to-live: 600000  # 10분 (개발 시 짧게)
+      cache-null-values: false
+
+  # Batch 설정
+  batch:
+    job:
+      enabled: false  # 로컬에서는 배치 자동 실행 비활성화
+    jdbc:
+      initialize-schema: always
+
+# 서버 설정
+server:
+  port: 8080
+
+# Actuator 설정 (로컬에서는 모두 오픈)
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: always
+
+# 로깅 설정 (로컬 - 디버그 레벨)
+logging:
+  level:
+    root: INFO
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    org.springframework.web: DEBUG
+    org.springframework.security: DEBUG
+    org.springframework.cache: TRACE
+
+# JWT 설정 (로컬 - 개발용 시크릿)
+jwt:
+  secret: localSecretKeyForDevelopment12345678901234567890123456789012345678901234567890

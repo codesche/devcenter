@@ -1,0 +1,102 @@
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+  # PostgreSQL 설정 (개발 서버)
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://dev-db.example.com:5432/techinterview_dev}
+    username: ${DB_USERNAME:dev_user}
+    password: ${DB_PASSWORD:dev_password}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 5
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      connection-test-query: SELECT 1
+
+  # JPA 개발 서버 설정
+  jpa:
+    hibernate:
+      ddl-auto: validate  # 개발 서버에서는 validate
+    properties:
+      hibernate:
+        format_sql: true
+        show_sql: false  # 개발 서버에서는 SQL 로그 비활성화
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+  # Redis 설정 (개발 서버)
+  data:
+    redis:
+      host: ${REDIS_HOST:dev-redis.example.com}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:dev_redis_password}
+      timeout: 2000ms
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 2
+
+  # 캐시 설정
+  cache:
+    type: redis
+    redis:
+      time-to-live: 1800000  # 30분
+      cache-null-values: false
+      use-key-prefix: true
+      key-prefix: "dev:"
+
+  # Batch 설정
+  batch:
+    job:
+      enabled: true
+    jdbc:
+      initialize-schema: never  # 개발 서버는 수동 관리
+
+# 서버 설정
+server:
+  port: ${SERVER_PORT:8080}
+
+# Actuator 설정 (개발 서버 - 제한적 오픈)
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: when-authorized
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+
+# 로깅 설정 (개발 서버)
+logging:
+  level:
+    root: INFO
+    com.techinterview: INFO
+    org.hibernate.SQL: DEBUG
+    org.springframework.security: INFO
+
+# JWT 설정 (개발 서버)
+jwt:
+  secret: ${JWT_SECRET}
+  access-token-validity: 1800000  # 30분
+  refresh-token-validity: 604800000  # 7일
+
+# CORS 설정 (개발 서버)
+cors:
+  allowed-origins:
+    - http://localhost:3000
+    - https://dev.example.com
+  allowed-methods:
+    - GET
+    - POST
+    - PUT
+    - DELETE
+    - PATCH
+    - OPTIONS

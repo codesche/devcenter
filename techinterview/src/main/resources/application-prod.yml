@@ -1,0 +1,171 @@
+spring:
+  config:
+    activate:
+      on-profile: prod
+
+  # PostgreSQL 설정 (운영 - RDS or Cloud SQL)
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 10
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      connection-test-query: SELECT 1
+      leak-detection-threshold: 60000  # 운영에서 커넥션 누수 감지
+
+  # JPA 운영 설정
+  jpa:
+    hibernate:
+      ddl-auto: none  # 운영에서는 절대 none
+    properties:
+      hibernate:
+        format_sql: false
+        show_sql: false
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        # 2차 캐시 활성화 (운영)
+        cache:
+          use_second_level_cache: true
+          use_query_cache: true
+          region:
+            factory_class: org.hibernate.cache.jcache.JCacheRegionFactory
+
+  # Redis 설정 (운영 - ElastiCache or Redis Cloud)
+  data:
+    redis:
+      cluster:
+        nodes: ${REDIS_CLUSTER_NODES}
+        max-redirects: 3
+      password: ${REDIS_PASSWORD}
+      timeout: 3000ms
+      lettuce:
+        pool:
+          max-active: 20
+          max-idle: 10
+          min-idle: 5
+        cluster:
+          refresh:
+            adaptive: true
+            period: 60000ms
+
+  # 캐시 설정 (운영)
+  cache:
+    type: redis
+    redis:
+      time-to-live: 3600000  # 1시간
+      cache-null-values: true  # null 값도 캐싱하여 DB 부하 감소
+      use-key-prefix: true
+      key-prefix: "prod:"
+
+  # Batch 설정 (운영)
+  batch:
+    job:
+      enabled: true
+    jdbc:
+      initialize-schema: never
+
+  # 세션 설정 (Redis Session 사용 시)
+  session:
+    store-type: redis
+    timeout: 30m
+    redis:
+      flush-mode: on-save
+      namespace: spring:session:prod
+
+# 서버 설정 (운영)
+server:
+  port: ${SERVER_PORT:8080}
+  tomcat:
+    threads:
+      max: 200
+      min-spare: 20
+    accept-count: 100
+    max-connections: 8192
+    connection-timeout: 20000
+  error:
+    include-message: never
+    include-stacktrace: never
+    include-exception: false
+
+# Actuator 설정 (운영 - 보안 강화)
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,metrics,prometheus
+      base-path: /management
+  endpoint:
+    health:
+      show-details: never  # 운영에서는 상세 정보 숨김
+
+# 로깅 설정 (운영)
+logging:
+  level:
+    root: WARN
+    org.springframework.security: WARN
+    org.hibernate: WARN
+  file:
+    name: /var/log/techinterview/application.log
+  logback:
+    rolling policy:
+      max-file-size: 100MB
+      max-history: 30
+      total-size-cap: 3GB
+
+# JWT 설정 (운영 - AWS Secrets Manager or 환경변수)
+jwt:
+  secret: ${JWT_SECRET}
+  access-token-validity: ${JWT_ACCESS_TOKEN_VALIDITY:900000}  # 15분
+  refresh-token-validity: ${JWT_REFRESH_TOKEN_VALIDITY:2592000000}  # 30일
+
+# CORS 설정 (운영)
+cors:
+  allowed-origins: ${CORS_ALLOWED_ORIGINS}
+  allowed-methods:
+    - GET
+    - POST
+    - PUT
+    - DELETE
+  allowed-headers:
+    - Authorization
+    - Content-Type
+    - Accept
+  exposed-headers:
+    - X-Total-Count
+    - X-Page-Number
+  max-age: 3600
+
+# 보안 설정 (운영)
+security:
+  require-ssl: true
+  headers:
+    frame-options: DENY
+    xss-protection: 1; mode=block
+    content-type-options: nosniff
+
+# API Rate Limiting (운영)
+rate-limiting:
+  enabled: true
+  requests-per-second: 100
+  burst-capacity: 200
+
+# AWS 설정 (운영 - 필요 시)
+cloud:
+  aws:
+    region:
+      static: ${AWS_REGION:ap-northeast-2}
+    credentials:
+      use-default-aws-credentials-chain: true
+    s3:
+      bucket: ${S3_BUCKET_NAME}
+
+# 모니터링 설정 (운영)
+monitoring:
+  apm:
+    enabled: ${APM_ENABLED:true}
+    service-name: tech-interview-prod
+    server-url: ${APM_SERVER_URL}
