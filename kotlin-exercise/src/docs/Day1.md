@@ -1,4 +1,4 @@
-# Kotlin 기초 학습 정리 - [Day 1]
+# Kotlin 기초 학습 정리 - Day 1
 
 > **목표**: TVING Backend Engineer 지원을 위한 Kotlin 기초 다지기  
 > **날짜**: 2025년 10월 1일  
