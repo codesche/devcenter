@@ -1,5 +1,6 @@
 package exercise
 
+// 실습 모음
 fun main() {
     println("=== 1. 변수 선언 ===")
     variableExample()
